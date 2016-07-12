@@ -5,15 +5,78 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"runtime"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/nats-io/nats"
 )
 
 var nc *nats.Conn
 var natsErr error
+
+func processEvent(data []byte) (*Event, error) {
+	var ev Event
+	err := json.Unmarshal(data, &ev)
+	return &ev, err
+}
+
+func eventHandler(m *nats.Msg) {
+	i, err := processEvent(m.Data)
+	if err != nil {
+		nc.Publish("instance.create.aws.error", m.Data)
+		return
+	}
+
+	if i.Valid() == false {
+		i.Error(errors.New("Instance is invalid"))
+		return
+	}
+
+	err = createInstance(i)
+	if err != nil {
+		i.Error(err)
+		return
+	}
+
+	i.Complete()
+}
+
+func createInstance(ev *Event) error {
+	creds := credentials.NewStaticCredentials(ev.DatacenterAccessKey, ev.DatacenterAccessToken, "")
+	svc := ec2.New(session.New(), &aws.Config{
+		Region:      aws.String(ev.DatacenterRegion),
+		Credentials: creds,
+	})
+
+	req := ec2.RunInstancesInput{
+		ImageId:      aws.String(ev.InstanceImage),
+		InstanceType: aws.String(ev.InstanceType),
+		SubnetId:     aws.String(ev.NetworkAWSID),
+		MaxCount:     aws.Int64(1),
+		MinCount:     aws.Int64(1),
+	}
+
+	if ev.SecurityGroupAWSID != "" {
+		req.SecurityGroupIds = append(req.SecurityGroupIds, aws.String(ev.SecurityGroupAWSID))
+	}
+
+	resp, err := svc.RunInstances(&req)
+	if err != nil {
+		return err
+	}
+
+	ev.InstanceAWSID = *resp.Instances[0].InstanceId
+
+	return nil
+}
 
 func main() {
 	natsURI := os.Getenv("NATS_URI")
@@ -26,11 +89,8 @@ func main() {
 		log.Fatal(natsErr)
 	}
 
-	nc.Subscribe("instance.create.aws", notImplemented)
+	fmt.Println("listening for instance.create.aws")
+	nc.Subscribe("instance.create.aws", eventHandler)
 
 	runtime.Goexit()
-}
-
-func notImplemented(m *nats.Msg) {
-	nc.Publish("instance.create.aws.error", []byte(`{"error":"not implemented"}`))
 }
