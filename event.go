@@ -20,7 +20,7 @@ var (
 	ErrInstanceTypeInvalid          = errors.New("Instance type invalid")
 )
 
-// Event stores the network create data
+// Event stores the instance data
 type Event struct {
 	ID                    string   `json:"id"`
 	DatacenterVPCID       string   `json:"datacenter_vpc_id"`
