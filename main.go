@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -35,8 +34,8 @@ func eventHandler(m *nats.Msg) {
 		return
 	}
 
-	if i.Valid() == false {
-		i.Error(errors.New("Instance is invalid"))
+	if err = i.Validate(); err != nil {
+		i.Error(err)
 		return
 	}
 
@@ -64,8 +63,8 @@ func createInstance(ev *Event) error {
 		MinCount:     aws.Int64(1),
 	}
 
-	if ev.SecurityGroupAWSID != "" {
-		req.SecurityGroupIds = append(req.SecurityGroupIds, aws.String(ev.SecurityGroupAWSID))
+	for _, sg := range ev.SecurityGroupAWSIDs {
+		req.SecurityGroupIds = append(req.SecurityGroupIds, aws.String(sg))
 	}
 
 	resp, err := svc.RunInstances(&req)
