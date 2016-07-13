@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -21,16 +20,11 @@ import (
 var nc *nats.Conn
 var natsErr error
 
-func processEvent(data []byte) (*Event, error) {
-	var ev Event
-	err := json.Unmarshal(data, &ev)
-	return &ev, err
-}
-
 func eventHandler(m *nats.Msg) {
-	i, err := processEvent(m.Data)
+	var i Event
+
+	err := i.Process(m.Data)
 	if err != nil {
-		nc.Publish("instance.create.aws.error", m.Data)
 		return
 	}
 
@@ -39,7 +33,7 @@ func eventHandler(m *nats.Msg) {
 		return
 	}
 
-	err = createInstance(i)
+	err = createInstance(&i)
 	if err != nil {
 		i.Error(err)
 		return
@@ -56,9 +50,10 @@ func createInstance(ev *Event) error {
 	})
 
 	req := ec2.RunInstancesInput{
+		SubnetId:     aws.String(ev.NetworkAWSID),
 		ImageId:      aws.String(ev.InstanceImage),
 		InstanceType: aws.String(ev.InstanceType),
-		SubnetId:     aws.String(ev.NetworkAWSID),
+		KeyName:      aws.String(ev.InstanceKeyPair),
 		MaxCount:     aws.Int64(1),
 		MinCount:     aws.Int64(1),
 	}

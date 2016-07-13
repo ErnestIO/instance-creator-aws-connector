@@ -33,6 +33,7 @@ type Event struct {
 	InstanceName          string   `json:"instance_name"`
 	InstanceImage         string   `json:"instance_image"`
 	InstanceType          string   `json:"instance_type"`
+	InstanceKeyPair       string   `json:"instance_key_pair"`
 	ErrorMessage          string   `json:"error,omitempty"`
 }
 
@@ -67,6 +68,15 @@ func (ev *Event) Validate() error {
 	}
 
 	return nil
+}
+
+// Process the raw event
+func (ev *Event) Process(data []byte) error {
+	err := json.Unmarshal(data, &ev)
+	if err != nil {
+		nc.Publish("instance.create.aws.error", data)
+	}
+	return err
 }
 
 // Error the request
