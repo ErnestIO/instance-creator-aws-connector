@@ -50,12 +50,13 @@ func createInstance(ev *Event) error {
 	})
 
 	req := ec2.RunInstancesInput{
-		SubnetId:     aws.String(ev.NetworkAWSID),
-		ImageId:      aws.String(ev.InstanceImage),
-		InstanceType: aws.String(ev.InstanceType),
-		KeyName:      aws.String(ev.InstanceKeyPair),
-		MaxCount:     aws.Int64(1),
-		MinCount:     aws.Int64(1),
+		SubnetId:         aws.String(ev.NetworkAWSID),
+		ImageId:          aws.String(ev.InstanceImage),
+		InstanceType:     aws.String(ev.InstanceType),
+		PrivateIpAddress: aws.String(ev.InstanceIP),
+		KeyName:          aws.String(ev.InstanceKeyPair),
+		MaxCount:         aws.Int64(1),
+		MinCount:         aws.Int64(1),
 	}
 
 	for _, sg := range ev.SecurityGroupAWSIDs {

@@ -35,6 +35,7 @@ type Event struct {
 	InstanceName          string   `json:"instance_name"`
 	InstanceImage         string   `json:"instance_image"`
 	InstanceType          string   `json:"instance_type"`
+	InstanceIP            string   `json:"instance_ip"`
 	InstanceKeyPair       string   `json:"instance_key_pair"`
 	ErrorMessage          string   `json:"error,omitempty"`
 }
