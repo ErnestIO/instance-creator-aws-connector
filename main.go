@@ -68,6 +68,15 @@ func createInstance(ev *Event) error {
 		return err
 	}
 
+	builtInstance := ec2.DescribeInstancesInput{
+		InstanceIds: []*string{resp.Instances[0].InstanceId},
+	}
+
+	err = svc.WaitUntilInstanceRunning(&builtInstance)
+	if err != nil {
+		return err
+	}
+
 	ev.InstanceAWSID = *resp.Instances[0].InstanceId
 
 	return nil
