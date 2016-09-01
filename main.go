@@ -42,6 +42,25 @@ func eventHandler(m *nats.Msg) {
 	i.Complete()
 }
 
+func assignElasticIP(svc *ec2.EC2, instanceID string) (string, error) {
+	// Create Elastic IP
+	resp, err := svc.AllocateAddress(nil)
+	if err != nil {
+		return "", err
+	}
+
+	req := ec2.AssociateAddressInput{
+		InstanceId:   aws.String(instanceID),
+		AllocationId: resp.AllocationId,
+	}
+	_, err = svc.AssociateAddress(&req)
+	if err != nil {
+		return "", err
+	}
+
+	return *resp.PublicIp, nil
+}
+
 func createInstance(ev *Event) error {
 	creds := credentials.NewStaticCredentials(ev.DatacenterAccessKey, ev.DatacenterAccessToken, "")
 	svc := ec2.New(session.New(), &aws.Config{
@@ -75,6 +94,13 @@ func createInstance(ev *Event) error {
 	err = svc.WaitUntilInstanceRunning(&builtInstance)
 	if err != nil {
 		return err
+	}
+
+	if ev.InstanceAssignElasticIP {
+		ev.InstanceElasticIP, err = assignElasticIP(svc, *resp.Instances[0].InstanceId)
+		if err != nil {
+			return err
+		}
 	}
 
 	ev.InstanceAWSID = *resp.Instances[0].InstanceId
