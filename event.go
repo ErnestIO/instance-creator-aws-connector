@@ -30,6 +30,7 @@ type Event struct {
 	DatacenterAccessKey     string   `json:"datacenter_access_key"`
 	DatacenterAccessToken   string   `json:"datacenter_access_token"`
 	NetworkAWSID            string   `json:"network_aws_id"`
+	NetworkIsPublic         bool     `json:"network_is_public"`
 	SecurityGroupAWSIDs     []string `json:"security_group_aws_ids"`
 	InstanceAWSID           string   `json:"instance_aws_id,omitempty"`
 	InstanceName            string   `json:"instance_name"`
@@ -37,6 +38,7 @@ type Event struct {
 	InstanceType            string   `json:"instance_type"`
 	InstanceIP              string   `json:"instance_ip"`
 	InstanceKeyPair         string   `json:"instance_key_pair"`
+	InstancePublicIP        string   `json:"instance_public_ip"`
 	InstanceElasticIP       string   `json:"instance_elastic_ip"`
 	InstanceAssignElasticIP bool     `json:"instance_assign_elastic_ip"`
 	ErrorMessage            string   `json:"error,omitempty"`
