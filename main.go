@@ -105,6 +105,10 @@ func createInstance(ev *Event) error {
 
 	ev.InstanceAWSID = *resp.Instances[0].InstanceId
 
+	if resp.Instances[0].PublicIpAddress != nil {
+		ev.InstancePublicIP = *resp.Instances[0].PublicIpAddress
+	}
+
 	return nil
 }
 
