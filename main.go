@@ -5,6 +5,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -61,6 +62,27 @@ func assignElasticIP(svc *ec2.EC2, instanceID string) (string, error) {
 	return *resp.PublicIp, nil
 }
 
+func getInstanceByID(svc *ec2.EC2, id *string) (*ec2.Instance, error) {
+	req := ec2.DescribeInstancesInput{
+		InstanceIds: []*string{id},
+	}
+
+	resp, err := svc.DescribeInstances(&req)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.Reservations) != 1 {
+		return nil, errors.New("Could not find any instance reservations")
+	}
+
+	if len(resp.Reservations[0].Instances) != 1 {
+		return nil, errors.New("Could not find an instance with that ID")
+	}
+
+	return resp.Reservations[0].Instances[0], nil
+}
+
 func createInstance(ev *Event) error {
 	creds := credentials.NewStaticCredentials(ev.DatacenterAccessKey, ev.DatacenterAccessToken, "")
 	svc := ec2.New(session.New(), &aws.Config{
@@ -105,8 +127,13 @@ func createInstance(ev *Event) error {
 
 	ev.InstanceAWSID = *resp.Instances[0].InstanceId
 
-	if resp.Instances[0].PublicIpAddress != nil {
-		ev.InstancePublicIP = *resp.Instances[0].PublicIpAddress
+	instance, err := getInstanceByID(svc, resp.Instances[0].InstanceId)
+	if err != nil {
+		return err
+	}
+
+	if instance.PublicIpAddress != nil {
+		ev.InstancePublicIP = *instance.PublicIpAddress
 	}
 
 	return nil
