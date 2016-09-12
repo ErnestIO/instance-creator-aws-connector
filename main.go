@@ -106,7 +106,8 @@ func createInstance(ev *Event) error {
 	}
 
 	if ev.InstanceUserData != "" {
-		data := encodeUserData(ev.InstanceUserData)
+		ud := fmt.Sprintf(ev.InstanceUserData, ev.DatacenterRegion)
+		data := encodeUserData(ud)
 		req.UserData = aws.String(data)
 	}
 
