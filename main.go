@@ -92,10 +92,10 @@ func createInstance(ev *Event) error {
 
 	req := ec2.RunInstancesInput{
 		SubnetId:         aws.String(ev.NetworkAWSID),
-		ImageId:          aws.String(ev.InstanceImage),
+		ImageId:          aws.String(ev.Image),
 		InstanceType:     aws.String(ev.InstanceType),
-		PrivateIpAddress: aws.String(ev.InstanceIP),
-		KeyName:          aws.String(ev.InstanceKeyPair),
+		PrivateIpAddress: aws.String(ev.IP),
+		KeyName:          aws.String(ev.KeyPair),
 		MaxCount:         aws.Int64(1),
 		MinCount:         aws.Int64(1),
 	}
@@ -118,8 +118,8 @@ func createInstance(ev *Event) error {
 		return err
 	}
 
-	if ev.InstanceAssignElasticIP {
-		ev.InstanceElasticIP, err = assignElasticIP(svc, *resp.Instances[0].InstanceId)
+	if ev.AssignElasticIP {
+		ev.ElasticIP, err = assignElasticIP(svc, *resp.Instances[0].InstanceId)
 		if err != nil {
 			return err
 		}
@@ -133,7 +133,7 @@ func createInstance(ev *Event) error {
 	}
 
 	if instance.PublicIpAddress != nil {
-		ev.InstancePublicIP = *instance.PublicIpAddress
+		ev.PublicIP = *instance.PublicIpAddress
 	}
 
 	return nil
