@@ -22,26 +22,26 @@ var (
 
 // Event stores the instance data
 type Event struct {
-	UUID                    string   `json:"_uuid"`
-	BatchID                 string   `json:"_batch_id"`
-	ProviderType            string   `json:"_type"`
-	DatacenterVPCID         string   `json:"datacenter_vpc_id"`
-	DatacenterRegion        string   `json:"datacenter_region"`
-	DatacenterAccessKey     string   `json:"datacenter_access_key"`
-	DatacenterAccessToken   string   `json:"datacenter_access_token"`
-	NetworkAWSID            string   `json:"network_aws_id"`
-	NetworkIsPublic         bool     `json:"network_is_public"`
-	SecurityGroupAWSIDs     []string `json:"security_group_aws_ids"`
-	InstanceAWSID           string   `json:"instance_aws_id,omitempty"`
-	InstanceName            string   `json:"instance_name"`
-	InstanceImage           string   `json:"instance_image"`
-	InstanceType            string   `json:"instance_type"`
-	InstanceIP              string   `json:"instance_ip"`
-	InstanceKeyPair         string   `json:"instance_key_pair"`
-	InstancePublicIP        string   `json:"instance_public_ip"`
-	InstanceElasticIP       string   `json:"instance_elastic_ip"`
-	InstanceAssignElasticIP bool     `json:"instance_assign_elastic_ip"`
-	ErrorMessage            string   `json:"error,omitempty"`
+	UUID                  string   `json:"_uuid"`
+	BatchID               string   `json:"_batch_id"`
+	ProviderType          string   `json:"_type"`
+	DatacenterVPCID       string   `json:"datacenter_vpc_id"`
+	DatacenterRegion      string   `json:"datacenter_region"`
+	DatacenterAccessKey   string   `json:"datacenter_access_key"`
+	DatacenterAccessToken string   `json:"datacenter_access_token"`
+	NetworkAWSID          string   `json:"network_aws_id"`
+	NetworkIsPublic       bool     `json:"network_is_public"`
+	SecurityGroupAWSIDs   []string `json:"security_group_aws_ids"`
+	InstanceAWSID         string   `json:"instance_aws_id,omitempty"`
+	Name                  string   `json:"name"`
+	Image                 string   `json:"image"`
+	InstanceType          string   `json:"instance_type"`
+	IP                    string   `json:"ip"`
+	KeyPair               string   `json:"key_pair"`
+	PublicIP              string   `json:"public_ip"`
+	ElasticIP             string   `json:"elastic_ip"`
+	AssignElasticIP       bool     `json:"assign_elastic_ip"`
+	ErrorMessage          string   `json:"error,omitempty"`
 }
 
 // Validate checks if all criteria are met
@@ -62,11 +62,11 @@ func (ev *Event) Validate() error {
 		return ErrNetworkInvalid
 	}
 
-	if ev.InstanceName == "" {
+	if ev.Name == "" {
 		return ErrInstanceNameInvalid
 	}
 
-	if ev.InstanceImage == "" {
+	if ev.Image == "" {
 		return ErrInstanceImageInvalid
 	}
 
