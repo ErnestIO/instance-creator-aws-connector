@@ -27,8 +27,8 @@ type Event struct {
 	ProviderType          string   `json:"_type"`
 	VPCID                 string   `json:"vpc_id"`
 	DatacenterRegion      string   `json:"datacenter_region"`
-	DatacenterAccessKey   string   `json:"datacenter_access_key"`
-	DatacenterAccessToken string   `json:"datacenter_access_token"`
+	DatacenterAccessKey   string   `json:"datacenter_secret"`
+	DatacenterAccessToken string   `json:"datacenter_token"`
 	NetworkAWSID          string   `json:"network_aws_id"`
 	NetworkIsPublic       bool     `json:"network_is_public"`
 	SecurityGroupAWSIDs   []string `json:"security_group_aws_ids"`
