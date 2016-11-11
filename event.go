@@ -38,6 +38,7 @@ type Event struct {
 	InstanceType          string   `json:"instance_type"`
 	IP                    string   `json:"ip"`
 	KeyPair               string   `json:"key_pair"`
+	UserData              string   `json:"user_data"`
 	PublicIP              string   `json:"public_ip"`
 	ElasticIP             string   `json:"elastic_ip"`
 	AssignElasticIP       bool     `json:"assign_elastic_ip"`
