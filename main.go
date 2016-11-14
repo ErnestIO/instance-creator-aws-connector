@@ -109,6 +109,11 @@ func createInstance(ev *Event) error {
 		req.SecurityGroupIds = append(req.SecurityGroupIds, aws.String(sg))
 	}
 
+	if ev.UserData != "" {
+		data := encodeUserData(ev.UserData)
+		req.UserData = aws.String(data)
+	}
+
 	resp, err := svc.RunInstances(&req)
 	if err != nil {
 		return err
@@ -128,11 +133,6 @@ func createInstance(ev *Event) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	if ev.UserData != "" {
-		data := encodeUserData(ev.UserData)
-		req.UserData = aws.String(data)
 	}
 
 	ev.InstanceAWSID = *resp.Instances[0].InstanceId
