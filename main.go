@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -83,6 +84,10 @@ func getInstanceByID(svc *ec2.EC2, id *string) (*ec2.Instance, error) {
 	return resp.Reservations[0].Instances[0], nil
 }
 
+func encodeUserData(data string) string {
+	return base64.StdEncoding.EncodeToString([]byte(data))
+}
+
 func createInstance(ev *Event) error {
 	creds := credentials.NewStaticCredentials(ev.DatacenterAccessKey, ev.DatacenterAccessToken, "")
 	svc := ec2.New(session.New(), &aws.Config{
@@ -123,6 +128,11 @@ func createInstance(ev *Event) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if ev.UserData != "" {
+		data := encodeUserData(ev.UserData)
+		req.UserData = aws.String(data)
 	}
 
 	ev.InstanceAWSID = *resp.Instances[0].InstanceId
